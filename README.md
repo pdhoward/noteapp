@@ -8,7 +8,9 @@ title: "codeacademy"
 
 * clone the app
 * npm install
-* set env for mongodb local remote
-* node index
+* set .env for mongodb local remote and MongoDB Atlas
+* node server
+
+
 
 

@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
   uri = process.env.ATLAS_URI;
 } else {  
   // localhost
-  uri = process.env.LOCAL_URI
+  uri = process.env.LOCAL_URI  
 }
 
 // database connection ppol
