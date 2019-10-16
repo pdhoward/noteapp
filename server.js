@@ -1,3 +1,9 @@
+
+////////////////////////////////
+///////  road to hire      ////
+//////   take notes!      ////
+/////////////////////////////
+
 require('dotenv').config()
 const express = require("express");
 const MongoClient = require("mongodb").MongoClient
@@ -7,14 +13,15 @@ const path = require("path");
 
 const app = express();
 
-app.use(logger("dev"));
 
+// register middleware component
+app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.static("public"));
 
 // Serve up static assets (heroku)
+// Connect to Atlas in production
 if (process.env.NODE_ENV === "production") {
   uri = process.env.ATLAS_URI;
 } else {  
@@ -22,9 +29,9 @@ if (process.env.NODE_ENV === "production") {
   uri = process.env.LOCAL_URI
 }
 
+// database connection ppol
 let db = ""
 let dbName = "notetaker"
-
 MongoClient.connect(uri, { useNewUrlParser: true,                            
                            useUnifiedTopology: true }, 
     (err, client) => 
@@ -37,17 +44,20 @@ MongoClient.connect(uri, { useNewUrlParser: true,
       db = client.db(dbName)   
 });
 
+
+////////////////////////
+///   api end points //
+//////////////////////
+
+// serve the hpme page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "./public/index.html"));
 });
 
-app.post("/submit", (req, res) => {
-  console.log(req.body);
+// post a new note
+app.post("/submit", (req, res) => { 
   const collection = db.collection('notes')
-
-  collection.insertOne(req.body, (error, data) => {
-    console.log(`this is from submit`)
-    console.log(data.ops[0])
+  collection.insertOne(req.body, (error, data) => {   
     if (error) {
       res.send(error);
     } else {
@@ -56,10 +66,11 @@ app.post("/submit", (req, res) => {
   });
 });
 
+// retrieve every document in the collection
+// note the .toArray() function to unpack the objects
 app.get("/all", (req, res) => {
   const collection = db.collection('notes')
-  collection.find({}).toArray((error, data) => {
-    console.log(data)
+  collection.find({}).toArray((error, data) => {    
     if (error) {
       res.send(error);
     } else {
@@ -68,6 +79,7 @@ app.get("/all", (req, res) => {
   })
 })
 
+// get a specific document based on objectid
 app.get("/find/:id", (req, res) => {
   const collection = db.collection('notes')  
   collection.findOne(
@@ -84,6 +96,7 @@ app.get("/find/:id", (req, res) => {
   );
 });
 
+//update a specific document identified by objectid
 app.post("/update/:id", (req, res) => {
   const collection = db.collection('notes')
   collection.updateOne(
@@ -107,6 +120,7 @@ app.post("/update/:id", (req, res) => {
   );
 });
 
+// delete one document identified by objectid
 app.delete("/delete/:id", (req, res) => {
   const collection = db.collection('notes')
   collection.deleteOne(
@@ -123,6 +137,7 @@ app.delete("/delete/:id", (req, res) => {
   );
 });
 
+// remove all documents from the collection
 app.delete("/clearall", (req, res) => {
   const collection = db.collection('notes')
   collection.deleteMany({}, (error, response) => {
