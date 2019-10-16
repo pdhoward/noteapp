@@ -109,9 +109,9 @@ app.post("/update/:id", (req, res) => {
 
 app.delete("/delete/:id", (req, res) => {
   const collection = db.collection('notes')
-  collection.remove(
+  collection.deleteOne(
     {
-      _id: ObjectID(req.params.id)
+      _id: ObjectId(req.params.id)
     },
     (error, data) => {
       if (error) {
@@ -124,7 +124,8 @@ app.delete("/delete/:id", (req, res) => {
 });
 
 app.delete("/clearall", (req, res) => {
-  db.notes.remove({}, (error, response) => {
+  const collection = db.collection('notes')
+  collection.deleteMany({}, (error, response) => {
     if (error) {
       res.send(error);
     } else {
