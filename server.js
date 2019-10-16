@@ -13,6 +13,8 @@ const path = require("path");
 
 const app = express();
 
+// note with heroku deployment you must source port from env
+const port = process.env.PORT || 3000;
 
 // register middleware component
 app.use(logger("dev"));
@@ -149,6 +151,6 @@ app.delete("/clearall", (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("App running on port 3000!");
+app.listen(port, () => {
+  console.log(`App running on port ${port}!`);
 });
