@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require("express");
-const mongojs = require("mongojs");
+const MongoClient = require("mongodb").MongoClient
+const ObjectId = require('mongodb').ObjectId;
 const logger = require("morgan");
 const path = require("path");
 
@@ -12,13 +14,27 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-const databaseUrl = "notetaker";
-const collections = ["notes"];
+// Serve up static assets (heroku)
+if (process.env.NODE_ENV === "production") {
+  uri = process.env.ATLAS_URI;
+} else {  
+  // localhost
+  uri = process.env.LOCAL_URI
+}
 
-const db = mongojs(databaseUrl, collections);
+let db = ""
+let dbName = "notetaker"
 
-db.on("error", error => {
-  console.log("Database Error:", error);
+MongoClient.connect(uri, { useNewUrlParser: true,                            
+                           useUnifiedTopology: true }, 
+    (err, client) => 
+      {
+        if (err) {    
+          console.log(err) 
+          return
+        }        
+      console.log("Connected successfully to server") 
+      db = client.db(dbName)   
 });
 
 app.get("/", (req, res) => {
@@ -27,30 +43,36 @@ app.get("/", (req, res) => {
 
 app.post("/submit", (req, res) => {
   console.log(req.body);
+  const collection = db.collection('notes')
 
-  db.notes.insert(req.body, (error, data) => {
+  collection.insertOne(req.body, (error, data) => {
+    console.log(`this is from submit`)
+    console.log(data.ops[0])
     if (error) {
       res.send(error);
     } else {
-      res.send(data);
+      res.send(data.ops[0]);
     }
   });
 });
 
 app.get("/all", (req, res) => {
-  db.notes.find({}, (error, data) => {
+  const collection = db.collection('notes')
+  collection.find({}).toArray((error, data) => {
+    console.log(data)
     if (error) {
       res.send(error);
     } else {
       res.json(data);
     }
-  });
-});
+  })
+})
 
 app.get("/find/:id", (req, res) => {
-  db.notes.findOne(
+  const collection = db.collection('notes')  
+  collection.findOne(
     {
-      _id: mongojs.ObjectId(req.params.id)
+      _id: ObjectId(req.params.id)
     },
     (error, data) => {
       if (error) {
@@ -63,9 +85,10 @@ app.get("/find/:id", (req, res) => {
 });
 
 app.post("/update/:id", (req, res) => {
-  db.notes.update(
+  const collection = db.collection('notes')
+  collection.updateOne(
     {
-      _id: mongojs.ObjectId(req.params.id)
+      _id: ObjectId(req.params.id)
     },
     {
       $set: {
@@ -85,9 +108,10 @@ app.post("/update/:id", (req, res) => {
 });
 
 app.delete("/delete/:id", (req, res) => {
-  db.notes.remove(
+  const collection = db.collection('notes')
+  collection.remove(
     {
-      _id: mongojs.ObjectID(req.params.id)
+      _id: ObjectID(req.params.id)
     },
     (error, data) => {
       if (error) {
