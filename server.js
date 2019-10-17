@@ -16,7 +16,7 @@ const app = express();
 // note with heroku deployment you must source port from env
 const port = process.env.PORT || 3000;
 
-// register middleware component
+// register middleware component and db
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -28,7 +28,8 @@ if (process.env.NODE_ENV === "production") {
   uri = process.env.ATLAS_URI;
 } else {  
   // localhost
-  uri = process.env.LOCAL_URI  
+  //uri = process.env.LOCAL_URI 
+  uri = process.env.ATLAS_URI; 
 }
 
 // database connection ppol
