@@ -13,7 +13,7 @@ const path = require("path");
 
 const app = express();
 
-// note with heroku deployment you must source port from env
+// note with heroku deployment you must source port from environment
 const port = process.env.PORT || 3000;
 
 // register middleware component and db
